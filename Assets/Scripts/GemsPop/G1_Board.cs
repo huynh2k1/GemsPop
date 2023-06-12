@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -34,16 +35,17 @@ public class G1_Board : MonoBehaviour
         {
             for (int j = 0; j < column; j++)
             {
-                //int index = Random.Range(0, blockList.Count); //Random block: red, green, blue, violet, yellow
                 int index = Random.Range(0, spriteList.Count - 1);
-                Vector2 pos = new Vector2(i, j); // Vị trí ô trên transform
+                Vector2 pos = new Vector2(i, j); // Vị trí ô
                 G1_Block block = Instantiate(blockPrefab, pos, Quaternion.identity); //Spawn ô
                 grid[i, j] = block; //gán ô vừa sinh ra vào mảng với chỉ số i,j
                 block.transform.SetParent(transform, false); //Set tất cả các block vừa sinh ra làm con của GameObject Board
                 block.name = "(" + i + "_" + j + ")"; // Set tên của các block theo vị trí i, j
-                SpriteRenderer renderer = block.GetComponent<SpriteRenderer>();
-                renderer.sprite = spriteList[index];
-                block.id = idBlocks[index];
+
+                //Gán ảnh 
+                block.UpdateSprite(spriteList[index]);
+                block.UpdateState(BlockState.full);
+
                 //Gán chỉ số row, col cho block vừa sinh ra
                 block.row = i;
                 block.col = j;
@@ -51,34 +53,110 @@ public class G1_Board : MonoBehaviour
             }
         }
     }
-    // Mảng này để lưu các ô trong quá trình loang
-    public List<G1_Block> listBlock = new List<G1_Block>();
+
     // thuật toán DFS tìm kiếm theo chiều sâu
     public void DFS(int i, int j)
     {
         visited[i, j] = true; // Đánh dấu ô vừa click đã được thăm
-        //Duyệt 2 mảng dx, dy để lấy ra cặp giá trị i,j tương ứng với ô chung cạnh liền kề(trái, dưới, trên, phải)
+        
         for (int k = 0; k < 4; k++)
         {
-            int i1 = i + dx[k]; 
-            int j1 = j + dy[k]; 
-            if (i1 >= 0 && i1 < row && j1 >= 0 && j1 < column && grid[i1, j1].id == grid[i, j].id && !visited[i1, j1])
-            { 
-                listBlock.Add(grid[i1, j1]);
+            int i1 = i + dx[k];
+            int j1 = j + dy[k];
+            if (i1 >= 0 && i1 < row && j1 >= 0 && j1 < column && grid[i1, j1].sprite == grid[i, j].sprite && !visited[i1, j1])
+            {
+                grid[i, j].UpdateState(BlockState.empty);
+                grid[i1, j1].UpdateState(BlockState.empty);
                 DFS(i1, j1);
             }
         }
     }
-    //
-    public void AddBlockInList(int i, int j)
+    public void ResetVisited()
     {
-        listBlock.Add(grid[i, j]);
-    }
-    public void GetIndexBlockInList()
-    {
-        for(int i = 0; i < listBlock.Count; i++)
+        for(int i = 0; i < row; i++)
         {
-            Debug.Log(listBlock[i]);
+            for(int j = 0; j < column; j++)
+            {
+                visited[i, j] = false;
+            }
+        }
+    }
+    public IEnumerator DeleteSprite()
+    {
+        for(int j = 0; j < column; j++)
+        {
+            for(int i = 0; i < row; i++)
+            {
+                if (grid[i, j].state == BlockState.empty)
+                {
+                    yield return new WaitForSeconds(0.025f);
+                    SwapSpriteRow(i, j);
+                }
+            }
+        }
+    }
+
+    public void SwapSpriteRow(int i, int j)
+    {
+        for (int k = j; k < column; k++) 
+        {
+            if (grid[i, k].state != BlockState.empty) // duyệt theo cột, nếu có ô null thì
+            {
+                Sprite temp = grid[i, j].sprite; 
+                grid[i, j].sprite = grid[i, k].sprite;
+                grid[i, j].UpdateState(BlockState.full);
+                grid[i, k].sprite = temp;
+                grid[i, k].UpdateState(BlockState.empty);
+                return;
+            }
+        }
+    }
+    public void SwapSpriteColumn(int i)
+    {
+        for(int k = 0; k < row; k++) //duyệt hàng 0
+        {
+            if (grid[k, 0].state == BlockState.empty) //Nếu có ô null
+            {
+                for(int j = 0; j < column; j++) //duyệt lên trên theo hàng
+                {
+                    Sprite temp = grid[i, j].sprite; 
+                    grid[i, j].sprite= grid[k, j].sprite;
+                    grid[i, j].UpdateState(BlockState.full);
+                    grid[k, j].sprite = temp;
+                    grid[k, j].UpdateState(BlockState.empty);
+                }
+                return;
+                
+            }
+        }
+    }
+    public IEnumerator ShifeTilesDown(int x, int y)
+    {
+        List<G1_Block> renders = new List<G1_Block>();
+        int nullCount = 0;
+
+        for(int j = y; j < column; j++)
+        {
+            G1_Block block = grid[x, j];
+            if(block.state == BlockState.empty)
+            {
+                nullCount++;
+            }
+            renders.Add(block);
+        }
+
+        for(int i = 0; i < nullCount; i++)
+        {
+            yield return new WaitForSeconds(0.5f);
+            for(int k = 0; k < renders.Count - 1; k++)
+            {
+                renders[k].sprite = renders[k + 1].sprite;
+                renders[k].UpdateState(BlockState.full);
+
+                renders[k + 1].sprite = null;
+                renders[k + 1].UpdateState(BlockState.empty);
+            }
         }
     }
 }
+
