@@ -71,6 +71,7 @@ public class G1_Board : MonoBehaviour
             }
         }
     }
+    //Reset các ô đã loang trước đó
     public void ResetVisited()
     {
         for(int i = 0; i < row; i++)
@@ -81,7 +82,8 @@ public class G1_Board : MonoBehaviour
             }
         }
     }
-    public IEnumerator DeleteSprite()
+    //Tìm ô không null theo hàng, và gán sprite ô đó cho ô null tìm được 
+    public IEnumerator TranslateRow()
     {
         for(int j = 0; j < column; j++)
         {
@@ -89,13 +91,27 @@ public class G1_Board : MonoBehaviour
             {
                 if (grid[i, j].state == BlockState.empty)
                 {
-                    yield return new WaitForSeconds(0.025f);
+                    yield return new WaitForSeconds(0.01f);
                     SwapSpriteRow(i, j);
                 }
             }
         }
     }
-
+    public IEnumerator TranslateColumn()
+    {
+        for (int i = 0; i < row; i++)
+        {
+            for (int j = 0; j < column; j++)
+            {
+                if (grid[i, j].state == BlockState.empty)
+                {
+                    yield return new WaitForSeconds(0.1f);
+                    SwapSpriteColumn();
+                }
+            }
+        }
+    }
+    // Dịch các ô theo hàng
     public void SwapSpriteRow(int i, int j)
     {
         for (int k = j; k < column; k++) 
@@ -111,20 +127,21 @@ public class G1_Board : MonoBehaviour
             }
         }
     }
-    public void SwapSpriteColumn(int i)
+    //Dịch các ô theo cột
+    public void SwapSpriteColumn()
     {
         for(int k = 0; k < row; k++) //duyệt hàng 0
         {
             if (grid[k, 0].state == BlockState.empty) //Nếu có ô null
             {
-                for(int j = 0; j < column; j++) //duyệt lên trên theo hàng
+                for(int j = 0; j < column; j++)
                 {
-                    Sprite temp = grid[i, j].sprite; 
-                    grid[i, j].sprite= grid[k, j].sprite;
-                    grid[i, j].UpdateState(BlockState.full);
+                    Sprite temp = grid[k + 1, j].sprite; 
+                    grid[k + 1, j].sprite= grid[k, j].sprite;
+                    grid[k + 1, j].UpdateState(BlockState.full);
                     grid[k, j].sprite = temp;
                     grid[k, j].UpdateState(BlockState.empty);
-                }
+                }    
                 return;
                 
             }

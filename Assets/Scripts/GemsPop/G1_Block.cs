@@ -20,7 +20,7 @@ public class G1_Block : MonoBehaviour
     {
         select = this;
         G1_Board.instance.DFS(select.row, select.col);
-        StartCoroutine(G1_Board.instance.DeleteSprite());
+        StartCoroutine(G1_Board.instance.TranslateRow());
         G1_Board.instance.ResetVisited();
     }
     public void UpdateState(BlockState temp)
