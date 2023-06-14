@@ -96,6 +96,15 @@ public class G1_Board : MonoBehaviour
                 }
             }
         }
+        for(int i = 0; i < row; i++)
+        {
+            if (grid[i, 0].state == BlockState.empty)
+            {
+                yield return new WaitForSeconds(0f);
+                SwapSpriteColumn(i);
+            }
+
+        }
         ResetVisited();
     }
 
@@ -117,40 +126,42 @@ public class G1_Board : MonoBehaviour
         }
     }
 
-    // Tìm ở hàng đầu tiên xem có ô nào sprite == null không?
-    public IEnumerator TranslateColumn()
-    {
+    //// Tìm ở hàng đầu tiên xem có ô nào sprite == null không?
+    //public IEnumerator TranslateColumn()
+    //{
         
-        for (int i = 0; i < row; i++)
-        {
-            if (grid[i, 0].state == BlockState.empty)
-            {
-                yield return new WaitForSeconds(0.1f);
-                SwapSpriteColumn(i);
-            }   
-        }
-        ResetVisited();
-    }
+    //    for (int i = 0; i < row; i++)
+    //    {
+    //        for(int j = 0; j < column; j++)
+    //        {
+    //            if (grid[i, 0].state == BlockState.empty && grid[i, j].state == BlockState.empty)
+    //            {
+    //                yield return new WaitForSeconds(0.1f);
+    //                SwapSpriteColumn(i);
+    //            }   
+
+    //        }    
+            
+    //    }
+    //}
 
     //Dịch các ô theo cột
     public void SwapSpriteColumn(int i)
     {
         for(int k = i; k < row; k++) //duyệt từ cột thứ k có ô null
         {
-            for(int j = 0; j < column; j++)
+            if (grid[k, 0].state != BlockState.empty)
             {
-                if (grid[k, 0].state != BlockState.empty) //nếu ô của cột tiếp đó(k + 1) có sprite
+                for (int j = 0; j < column; j++)
                 {
-
                     Sprite temp = grid[i, j].sprite; //gán temp = ô có sprite vừa tìm được bên trên
                     grid[i, j].sprite = grid[k, j].sprite; //gán ô[k + 1, j].sprite cho ô null ở cột i, hàng j 
-                    grid[k, j].sprite = temp;
                     grid[i, j].UpdateState(BlockState.full); //cập nhật trạng thái ô null -> full
+                    grid[k, j].sprite = temp;
                     grid[k, j].UpdateState(BlockState.empty);
-                    return;
                 }
-            }    
-            
+                return;
+            }
         }
     }
 }
