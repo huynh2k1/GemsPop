@@ -126,26 +126,7 @@ public class G1_Board : MonoBehaviour
         }
     }
 
-    ////Dịch các ô theo cột
-    //public void SwapSpriteColumn(int i)
-    //{
-    //    for(int k = i; k < row; k++) //duyệt từ cột thứ k có ô null
-    //    {
-    //        if (grid[k, 0].state != BlockState.empty)
-    //        {
-    //            for (int j = 0; j < column; j++)
-    //            {
-    //                Sprite temp = grid[i, j].sprite; //gán temp = ô có sprite vừa tìm được bên trên
-    //                grid[i, j].sprite = grid[k, j].sprite; //gán ô[k + 1, j].sprite cho ô null ở cột i, hàng j 
-    //                grid[i, j].UpdateState(BlockState.full); //cập nhật trạng thái ô null -> full
-    //                grid[k, j].sprite = temp;
-    //                grid[k, j].UpdateState(BlockState.empty);
-    //            }
-
-    //            return;
-    //        }
-    //    }
-    //}
+    
 
     //Dịch các ô theo cột
     public void SwapSpriteColumn(int i)
