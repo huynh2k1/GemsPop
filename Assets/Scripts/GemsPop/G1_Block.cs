@@ -19,9 +19,11 @@ public class G1_Block : MonoBehaviour
     private void OnMouseDown()
     {
         select = this;
+        G1_Board.instance.count = 0;
         G1_Board.instance.DFS(select.row, select.col);
+        G1_Board.instance.AddPoint();
         StartCoroutine(G1_Board.instance.TranslateRow());
-        //StartCoroutine(G1_Board.instance.TranslateColumn());
+
     }
     public void UpdateState(BlockState temp)
     {

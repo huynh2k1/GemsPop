@@ -15,6 +15,8 @@ public class G1_Board : MonoBehaviour
     public List<Sprite> spriteList = new List<Sprite>();
     public List<int> idBlocks = new List<int>();
 
+    public int count = 0;
+    public int count2 = 0;
     public bool[,] visited = new bool[10, 10];
     public int[] dx = { -1, 0, 0, 1 };
     public int[] dy = { 0, -1, 1, 0 };
@@ -24,8 +26,30 @@ public class G1_Board : MonoBehaviour
         instance = this;
         InitBoard();
     }
-    private void Start()
+    private void Update()
     {
+        for(int i = 0; i < row; i++)
+        {
+            for(int j = 0; j < column; j++)
+            {
+                DFS(i, j);
+            }
+        }
+        if(Input.GetKeyDown(KeyCode.A))
+        {
+            for (int i = 0; i < row; i++)
+            {
+                for (int j = 0; j < column; j++)
+                {
+                    grid[i, j].UpdateSprite(null);
+                    grid[i, j].UpdateState(BlockState.empty);
+
+                    int index = Random.Range(0, spriteList.Count - 1);
+                    grid[i, j].UpdateSprite(spriteList[index]);
+                    grid[i, j].UpdateState(BlockState.full);
+                }
+            }
+        }
     }
 
     public void InitBoard()
@@ -53,12 +77,11 @@ public class G1_Board : MonoBehaviour
             }
         }
     }
-
+    
     // thuật toán DFS tìm kiếm theo chiều sâu
     public void DFS(int i, int j)
     {
         visited[i, j] = true; // Đánh dấu ô vừa click đã được thăm
-        
         for (int k = 0; k < 4; k++)
         {
             int i1 = i + dx[k];
@@ -70,7 +93,36 @@ public class G1_Board : MonoBehaviour
                 DFS(i1, j1);
             }
         }
+        count++;
     }
+    public void DFS2(int i, int j)
+    {
+        visited[i, j] = true; // Đánh dấu ô vừa click đã được thăm
+        for (int k = 0; k < 4; k++)
+        {
+            int i1 = i + dx[k];
+            int j1 = j + dy[k];
+            if (i1 >= 0 && i1 < row && j1 >= 0 && j1 < column && grid[i1, j1].sprite == grid[i, j].sprite && !visited[i1, j1])
+            {
+                DFS(i1, j1);
+            }
+        }
+        count2++;
+    }
+
+    public void AddPoint()
+    {
+        if(count <= 1)
+        {
+            return;
+        }
+        else
+        {
+            G1_GameController.instance.score += count * 5 + ((count * (count - 1)) / 2) * 5;
+            G1_CanvasController.instance.UpdateScoreText(G1_GameController.instance.score);
+        }
+    }    
+
     //Reset các ô đã loang trước đó
     public void ResetVisited()
     {
@@ -154,5 +206,6 @@ public class G1_Board : MonoBehaviour
             }
         }
     }
+
 }
 
